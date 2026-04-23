@@ -217,11 +217,14 @@ async function askLlm(event: EventData, context: ContextItem[]): Promise<LlmResp
   }
 }
 
-function extractEventWref(payload: SpritePayload): string | null {
-  const ops = payload.matchedOperations ?? [];
-  for (const op of ops) {
-    // Sprite runtime nests the commit op under .operation; support both shapes.
-    const nm = (op as any)?.operation?.name ?? (op as any)?.name;
+function extractEventWref(payload: any): string | null {
+  // Sprite runtime envelope: { payload: { matchedOperations: [{ operation: { name } }] }, warmhubToken, secretToken }.
+  // Fall back to legacy flat shapes for local-dev testing.
+  const inner = payload?.payload ?? payload;
+  const ops = inner?.matchedOperations ?? [];
+  for (const rawOp of ops) {
+    const op = (rawOp as any)?.operation ?? rawOp;
+    const nm = op?.name;
     if (typeof nm === "string" && nm.startsWith("FishKillEvent/")) return nm;
   }
   return null;
