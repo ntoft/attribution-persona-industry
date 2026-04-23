@@ -3542,7 +3542,9 @@ async function loadCredentialsFromPayload(payload) {
 var PERSONA = "industry";
 var PROMPT_VERSION = "v1-2026-04-23-industry";
 var PERSONA_PRIORS = `Your priors favor natural and climatic causes \u2014 harmful algal blooms, thermal stress, hypoxic (low-DO) events, fish disease, and stormflow-driven habitat disruption \u2014 over deliberate industrial pollution narratives. You are skeptical of attribution to specific facilities absent strong contemporaneous water-quality exceedances and permit violations. You prioritize temperature, dissolved-oxygen, and seasonal ecology when explaining events.`;
-var MODEL = process.env.PERSONA_MODEL ?? "anthropic/claude-3.5-sonnet";
+function resolveModel() {
+  return process.env.PERSONA_MODEL ?? "anthropic/claude-3-haiku";
+}
 var OPENROUTER_BASE = process.env.OPENROUTER_BASE ?? "https://openrouter.ai/api/v1";
 var CONTEXT_LIMIT = 40;
 var RADIUS_DEG = 0.75;
@@ -3678,7 +3680,7 @@ async function askLlm(event, context) {
       "X-Title": "fish-kill-attribution-industry"
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: resolveModel(),
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -3749,7 +3751,7 @@ async function main() {
       cause: b.cause,
       share: b.share,
       persona: PERSONA,
-      model: MODEL,
+      model: resolveModel(),
       prompt_version: PROMPT_VERSION,
       rationale: b.rationale,
       sl_belief: b.sl_belief,
@@ -3764,7 +3766,7 @@ async function main() {
   console.log(JSON.stringify({
     eventWref,
     persona: PERSONA,
-    model: MODEL,
+    model: resolveModel(),
     commitId: result.commitId,
     beliefsEmitted: beliefs.length,
     causes: beliefs.map((b) => b.cause),
